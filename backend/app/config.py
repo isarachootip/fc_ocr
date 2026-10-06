@@ -16,6 +16,13 @@ class Settings(BaseSettings):
     
     # Gemini AI
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+
+    # Authentication (login is refused until ADMIN_PASSWORD and SESSION_SECRET are set)
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = ""
+    SESSION_SECRET: str = ""
+    SESSION_HOURS: float = 8
+    COOKIE_SECURE: bool = True
     
     # Uploads & Storage
     UPLOAD_DIR: Path = BASE_DIR / "uploads"

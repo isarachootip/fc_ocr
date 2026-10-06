@@ -5,6 +5,7 @@ from app.config import settings, BASE_DIR
 from app.database import engine, Base
 from app.models.vendor import Vendor  # ensure models are registered
 from app.api import api_router
+from app.api.uploads import router as uploads_router
 
 # Create DB tables
 Base.metadata.create_all(bind=engine)
@@ -15,17 +16,17 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS Middleware
+# CORS: the SPA is served same-origin in production; only the Vite dev server needs it.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount static uploads directory for document preview
-app.mount("/uploads", StaticFiles(directory=str(settings.UPLOAD_DIR)), name="uploads")
+# Protected uploads (ID card previews) - requires login
+app.include_router(uploads_router)
 
 # Include API routes
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

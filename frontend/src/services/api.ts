@@ -1,3 +1,4 @@
+﻿import { apiFetch } from './http';
 import type { IdCardOcrResult } from '../types/ocr';
 import type {
   VendorFormData,
@@ -11,7 +12,7 @@ export async function scanIdCard(file: File): Promise<IdCardOcrResult> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await fetch(`${BASE_URL}/ocr/scan-id-card`, {
+  const res = await apiFetch(`${BASE_URL}/ocr/scan-id-card`, {
     method: 'POST',
     body: formData,
   });
@@ -25,7 +26,7 @@ export async function scanIdCard(file: File): Promise<IdCardOcrResult> {
 }
 
 export async function createVendor(data: VendorFormData): Promise<VendorRecord> {
-  const res = await fetch(`${BASE_URL}/vendors`, {
+  const res = await apiFetch(`${BASE_URL}/vendors`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -52,19 +53,19 @@ export async function listVendors(
     params.set('query', query.trim());
   }
 
-  const res = await fetch(`${BASE_URL}/vendors?${params.toString()}`);
+  const res = await apiFetch(`${BASE_URL}/vendors?${params.toString()}`);
   if (!res.ok) throw new Error('Failed to load vendors');
   return res.json();
 }
 
 export async function getVendor(id: number): Promise<VendorRecord> {
-  const res = await fetch(`${BASE_URL}/vendors/${id}`);
+  const res = await apiFetch(`${BASE_URL}/vendors/${id}`);
   if (!res.ok) throw new Error('Vendor not found');
   return res.json();
 }
 
 export async function deleteVendor(id: number): Promise<void> {
-  const res = await fetch(`${BASE_URL}/vendors/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`${BASE_URL}/vendors/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error('Failed to delete vendor');
 }
 

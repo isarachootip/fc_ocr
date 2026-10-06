@@ -4,6 +4,15 @@ from app.main import app
 
 client = TestClient(app)
 
+
+@pytest.fixture(autouse=True)
+def _login():
+    res = client.post("/api/auth/login", json={"username": "admin", "password": "s3cret-pass"})
+    assert res.status_code == 200, res.text
+    yield
+    client.cookies.clear()
+
+
 def test_health():
     res = client.get("/health")
     assert res.status_code == 200

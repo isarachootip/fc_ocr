@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Building2, ListFilter, PlusCircle, CheckCircle } from 'lucide-react';
+import { Building2, ListFilter, PlusCircle, CheckCircle, LogOut } from 'lucide-react';
+import { useAuth } from './hooks/useAuth';
 import type { VendorFormData, VendorRecord } from './types/vendor';
 import type { IdCardOcrResult } from './types/ocr';
 import { OcrUploader } from './components/ocr/OcrUploader';
@@ -23,6 +24,7 @@ const INITIAL_FORM: VendorFormData = {
 };
 
 export const App: React.FC = () => {
+  const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState<'form' | 'list'>('form');
   const [formData, setFormData] = useState<VendorFormData>({ ...INITIAL_FORM });
   const [ocrModalData, setOcrModalData] = useState<IdCardOcrResult | null>(null);
@@ -84,6 +86,16 @@ export const App: React.FC = () => {
               }`}
             >
               <ListFilter className="w-4 h-4" /> ทะเบียนผู้ค้า & พิมพ์เอกสาร
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-500 hidden sm:inline">{user.username}</span>
+            <button
+              onClick={signOut}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 flex items-center gap-1.5 transition-colors"
+            >
+              <LogOut className="w-4 h-4" /> ออกจากระบบ
             </button>
           </div>
         </div>
