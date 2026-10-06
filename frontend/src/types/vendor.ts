@@ -103,6 +103,7 @@ export interface VendorRecord extends VendorFormData {
   id: number;
   vendor_code: string;
   created_at: string;
+  created_by?: string | null;
   updated_at: string;
 }
 
@@ -115,6 +116,7 @@ export interface VendorListItem {
   status_type?: string;
   oracle_module?: string;
   created_at: string;
+  created_by?: string | null;
 }
 
 export interface PaginatedVendorResponse {

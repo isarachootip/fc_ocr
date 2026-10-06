@@ -1,7 +1,9 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from app.api.deps import require_user
 from app.database import get_db
+from app.models.user import User
 from app.schemas.vendor import (
     VendorCreate,
     VendorUpdate,
@@ -13,8 +15,14 @@ from app.services import vendor_service
 router = APIRouter(prefix="/vendors", tags=["Vendors"])
 
 @router.post("", response_model=VendorResponse, status_code=201)
-def create_vendor(vendor_in: VendorCreate, db: Session = Depends(get_db)):
-    return vendor_service.create_vendor(db, vendor_in, vendor_in.id_card_file_path)
+def create_vendor(
+    vendor_in: VendorCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_user),
+):
+    return vendor_service.create_vendor(
+        db, vendor_in, vendor_in.id_card_file_path, created_by=user.username
+    )
 
 @router.get("", response_model=PaginatedVendorResponse)
 def list_vendors(

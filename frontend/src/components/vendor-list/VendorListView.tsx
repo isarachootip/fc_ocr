@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Search, FileSpreadsheet, FileText, Printer, Trash2, Loader2 } from 'lucide-react';
 import type { VendorListItem, VendorRecord } from '../../types/vendor';
 import { listVendors, deleteVendor, getExcelExportUrl, getPdfExportUrl, getVendor } from '../../services/api';
@@ -90,20 +90,21 @@ export const VendorListView: React.FC<Props> = ({ onSelectPrint }) => {
               <th className="py-3 px-4">ชื่อร้านค้า / บุคคล</th>
               <th className="py-3 px-4">เลขประจำตัว 13 หลัก</th>
               <th className="py-3 px-4">วันที่บันทึก</th>
+              <th className="py-3 px-4">ผู้บันทึก</th>
               <th className="py-3 px-4 text-center">จัดการและพิมพ์เอกสาร</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-slate-700">
             {loading ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-slate-400">
+                <td colSpan={6} className="py-8 text-center text-slate-400">
                   <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
                   กำลังโหลดข้อมูล...
                 </td>
               </tr>
             ) : vendors.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-slate-400">
+                <td colSpan={6} className="py-8 text-center text-slate-400">
                   ยังไม่มีข้อมูลผู้ค้าในระบบ
                 </td>
               </tr>
@@ -114,6 +115,7 @@ export const VendorListView: React.FC<Props> = ({ onSelectPrint }) => {
                   <td className="py-3 px-4 font-medium text-slate-900">{v.vendor_name_th}</td>
                   <td className="py-3 px-4 font-mono">{v.tax_id}</td>
                   <td className="py-3 px-4 text-slate-500">{new Date(v.created_at).toLocaleDateString('th-TH')}</td>
+                  <td className="py-3 px-4 text-slate-500">{v.created_by ?? '-'}</td>
                   <td className="py-3 px-4">
                     <div className="flex items-center justify-center gap-1.5">
                       <button

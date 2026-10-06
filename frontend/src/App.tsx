@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Building2, ListFilter, PlusCircle, CheckCircle, LogOut } from 'lucide-react';
+import { Building2, ListFilter, PlusCircle, CheckCircle, LogOut, Users, KeyRound } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
+import { UsersView } from './components/users/UsersView';
+import { ChangePasswordModal } from './components/auth/ChangePasswordModal';
 import type { VendorFormData, VendorRecord } from './types/vendor';
 import type { IdCardOcrResult } from './types/ocr';
 import { OcrUploader } from './components/ocr/OcrUploader';
@@ -25,7 +27,8 @@ const INITIAL_FORM: VendorFormData = {
 
 export const App: React.FC = () => {
   const { user, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState<'form' | 'list'>('form');
+  const [activeTab, setActiveTab] = useState<'form' | 'list' | 'users'>('form');
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<VendorFormData>({ ...INITIAL_FORM });
   const [ocrModalData, setOcrModalData] = useState<IdCardOcrResult | null>(null);
   const [printVendor, setPrintVendor] = useState<VendorRecord | null>(null);
@@ -87,10 +90,26 @@ export const App: React.FC = () => {
             >
               <ListFilter className="w-4 h-4" /> ทะเบียนผู้ค้า & พิมพ์เอกสาร
             </button>
+            {user.role === 'admin' && (
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  activeTab === 'users' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Users className="w-4 h-4" /> จัดการผู้ใช้
+              </button>
+            )}
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500 hidden sm:inline">{user.username}</span>
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-slate-500 hidden sm:inline mr-2">{user.username}</span>
+            <button
+              onClick={() => setShowPassword(true)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 flex items-center gap-1.5 transition-colors"
+            >
+              <KeyRound className="w-4 h-4" /> เปลี่ยนรหัสผ่าน
+            </button>
             <button
               onClick={signOut}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 flex items-center gap-1.5 transition-colors"
@@ -123,6 +142,8 @@ export const App: React.FC = () => {
               onReset={() => setFormData({ ...INITIAL_FORM })}
             />
           </div>
+        ) : activeTab === 'users' && user.role === 'admin' ? (
+          <UsersView />
         ) : (
           <VendorListView onSelectPrint={(v) => setPrintVendor(v)} />
         )}
@@ -136,6 +157,8 @@ export const App: React.FC = () => {
           onClose={() => setOcrModalData(null)}
         />
       )}
+
+      {showPassword && <ChangePasswordModal onClose={() => setShowPassword(false)} />}
 
       {/* A4 Printable View Modal */}
       {printVendor && (

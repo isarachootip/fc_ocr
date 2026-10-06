@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Index
 from app.database import Base
 
@@ -9,6 +9,7 @@ class Vendor(Base):
     vendor_code = Column(String(50), unique=True, index=True, nullable=False)
     id_card_file_path = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
+    created_by = Column(String(50), nullable=True)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
     # 1. ข้อมูลผู้ขอ (Requestor)

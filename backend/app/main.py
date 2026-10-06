@@ -4,11 +4,15 @@ from fastapi.staticfiles import StaticFiles
 from app.config import settings, BASE_DIR
 from app.database import engine, Base
 from app.models.vendor import Vendor  # ensure models are registered
+from app.models.user import User  # noqa: F401  (ensure model is registered)
 from app.api import api_router
 from app.api.uploads import router as uploads_router
+from app.db_init import ensure_schema, seed_admin
 
-# Create DB tables
+# Create DB tables, upgrade older schemas, seed the first admin
 Base.metadata.create_all(bind=engine)
+ensure_schema(engine)
+seed_admin()
 
 app = FastAPI(
     title=settings.APP_NAME,

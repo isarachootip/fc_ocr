@@ -1,4 +1,4 @@
-import time
+﻿import time
 from app.services import auth_service as auth
 
 
@@ -25,14 +25,6 @@ def test_token_wrong_secret_rejected():
 def test_token_expired_rejected():
     token = auth.create_token("admin", SECRET, ttl_seconds=-1)
     assert auth.verify_token(token, SECRET) is None
-
-
-def test_credentials_check():
-    assert auth.check_credentials("admin", "pw", "admin", "pw")
-    assert not auth.check_credentials("admin", "bad", "admin", "pw")
-    assert not auth.check_credentials("other", "pw", "admin", "pw")
-    # An unconfigured (empty) password must never authenticate.
-    assert not auth.check_credentials("admin", "", "admin", "")
 
 
 def test_throttle_blocks_after_limit():

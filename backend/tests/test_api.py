@@ -1,4 +1,4 @@
-import pytest
+﻿import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -7,7 +7,7 @@ client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def _login():
-    res = client.post("/api/auth/login", json={"username": "admin", "password": "s3cret-pass"})
+    res = client.post("/api/auth/login", json={"username": "t_admin", "password": "s3cret-pass"})
     assert res.status_code == 200, res.text
     yield
     client.cookies.clear()

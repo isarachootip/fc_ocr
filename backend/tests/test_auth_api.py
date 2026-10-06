@@ -1,4 +1,4 @@
-from fastapi.testclient import TestClient
+﻿from fastapi.testclient import TestClient
 from app.main import app
 from app.config import settings
 
@@ -12,7 +12,7 @@ PROTECTED = [
 ]
 
 
-def login(client, password="s3cret-pass", username="admin"):
+def login(client, password="s3cret-pass", username="t_admin"):
     return client.post("/api/auth/login", json={"username": username, "password": password})
 
 
@@ -31,9 +31,9 @@ def test_login_success_sets_httponly_cookie_and_grants_access():
     client = TestClient(app)
     res = login(client)
     assert res.status_code == 200
-    assert res.json()["username"] == "admin"
+    assert res.json()["username"] == "t_admin"
     assert "httponly" in res.headers["set-cookie"].lower()
-    assert client.get("/api/auth/me").json()["username"] == "admin"
+    assert client.get("/api/auth/me").json()["username"] == "t_admin"
     assert client.get("/api/vendors").status_code == 200
 
 
@@ -52,14 +52,8 @@ def test_logout_clears_session():
 
 def test_forged_cookie_rejected():
     client = TestClient(app)
-    client.cookies.set("session", "admin.9999999999.deadbeef")
+    client.cookies.set("session", "t_admin.9999999999.deadbeef")
     assert client.get("/api/vendors").status_code == 401
-
-
-def test_unconfigured_auth_fails_closed(monkeypatch):
-    monkeypatch.setattr(settings, "ADMIN_PASSWORD", "")
-    client = TestClient(app)
-    assert login(client, password="").status_code == 503
 
 
 def test_short_session_secret_fails_closed(monkeypatch):

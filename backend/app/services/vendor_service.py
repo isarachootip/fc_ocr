@@ -5,7 +5,12 @@ from app.models.vendor import Vendor
 from app.schemas.vendor import VendorCreate, VendorUpdate
 from app.services.running_number import generate_vendor_code
 
-def create_vendor(db: Session, vendor_in: VendorCreate, file_path: Optional[str] = None) -> Vendor:
+def create_vendor(
+    db: Session,
+    vendor_in: VendorCreate,
+    file_path: Optional[str] = None,
+    created_by: Optional[str] = None,
+) -> Vendor:
     """Create a new vendor with an automatic running code."""
     vendor_code = generate_vendor_code(db)
     vendor_data = vendor_in.model_dump()
@@ -13,7 +18,7 @@ def create_vendor(db: Session, vendor_in: VendorCreate, file_path: Optional[str]
     if file_path:
         vendor_data["id_card_file_path"] = file_path
 
-    vendor = Vendor(vendor_code=vendor_code, **vendor_data)
+    vendor = Vendor(vendor_code=vendor_code, created_by=created_by, **vendor_data)
     db.add(vendor)
     db.commit()
     db.refresh(vendor)

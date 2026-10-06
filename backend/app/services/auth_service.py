@@ -1,4 +1,4 @@
-"""Pure authentication logic: signed session tokens, credential check, login throttle."""
+﻿"""Pure authentication logic: signed session tokens, credential check, login throttle."""
 import hashlib
 import hmac
 import threading
@@ -29,15 +29,6 @@ def verify_token(token: str, secret: str) -> Optional[str]:
     if expires_at < time.time():
         return None
     return username
-
-
-def check_credentials(username: str, password: str, expected_user: str, expected_pass: str) -> bool:
-    """Constant-time comparison. An empty expected password never authenticates."""
-    if not expected_pass:
-        return False
-    user_ok = hmac.compare_digest(username.encode(), expected_user.encode())
-    pass_ok = hmac.compare_digest(password.encode(), expected_pass.encode())
-    return user_ok and pass_ok
 
 
 class LoginThrottle:

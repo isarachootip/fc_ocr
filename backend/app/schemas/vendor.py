@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -113,6 +113,7 @@ class VendorResponse(VendorBase):
     id: int
     vendor_code: str
     created_at: datetime
+    created_by: Optional[str] = None
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -126,6 +127,7 @@ class VendorListItem(BaseModel):
     status_type: Optional[str] = None
     oracle_module: Optional[str] = None
     created_at: datetime
+    created_by: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
