@@ -24,9 +24,19 @@ export const UsersView: React.FC = () => {
 
   return (
     <div className="space-y-5">
-      <UserCreateForm onCreated={upsert} />
-      {error && <div role="alert" className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs">{error}</div>}
-      <UsersTable users={users} currentUsername={user.username} onChanged={upsert} onError={setError} />
+      <UserCreateForm currentUserRole={user.role} onCreated={upsert} />
+      {error && (
+        <div role="alert" className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs">
+          {error}
+        </div>
+      )}
+      <UsersTable
+        users={users}
+        currentUsername={user.username}
+        currentUserRole={user.role}
+        onChanged={upsert}
+        onError={setError}
+      />
     </div>
   );
 };

@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.services.password_service import hash_password, password_problem, verify_password
 
-ROLES = ("admin", "user")
+ROLES = ("admin", "user", "sysadmin")
+ADMIN_ROLES = ("admin", "sysadmin")
 _USERNAME_RE = re.compile(r"^[a-z0-9._-]{3,50}$")
 # Used to keep login timing similar whether or not the username exists.
 _DUMMY_HASH = hash_password("dummy-password-for-timing")
@@ -14,6 +15,20 @@ _DUMMY_HASH = hash_password("dummy-password-for-timing")
 
 class UserError(ValueError):
     """Raised for invalid user operations; message is safe to show to the admin."""
+
+
+class UserPermissionError(UserError):
+    """The acting user's role is not allowed to perform this operation."""
+
+
+def _guard_sysadmin(actor_role: Optional[str], target_role: str, requested_role: Optional[str]) -> None:
+    """Only a sysadmin (or the system itself, actor_role=None) may touch or grant sysadmin."""
+    if actor_role is None or actor_role == "sysadmin":
+        return
+    if target_role == "sysadmin":
+        raise UserPermissionError("Only a sysadmin can modify a sysadmin account")
+    if requested_role == "sysadmin":
+        raise UserPermissionError("Only a sysadmin can grant the sysadmin role")
 
 
 def normalise_username(username: str) -> str:
@@ -30,16 +45,17 @@ def list_users(db: Session) -> List[User]:
 
 def _active_admin_count(db: Session) -> int:
     return db.scalar(
-        select(func.count(User.id)).where(User.role == "admin", User.is_active.is_(True))
+        select(func.count(User.id)).where(User.role.in_(ADMIN_ROLES), User.is_active.is_(True))
     ) or 0
 
 
-def create_user(db: Session, username: str, password: str, role: str) -> User:
+def create_user(db: Session, username: str, password: str, role: str, actor_role: Optional[str] = None) -> User:
     name = normalise_username(username)
     if not _USERNAME_RE.match(name):
         raise UserError("Username must be 3-50 characters: letters, digits, '.', '_' or '-'")
     if role not in ROLES:
         raise UserError("Invalid role")
+    _guard_sysadmin(actor_role, target_role="", requested_role=role)
     problem = password_problem(password)
     if problem:
         raise UserError(problem)
@@ -72,16 +88,19 @@ def update_user(
     role: Optional[str] = None,
     is_active: Optional[bool] = None,
     password: Optional[str] = None,
+    actor_role: Optional[str] = None,
 ) -> User:
     user = db.get(User, user_id)
     if user is None:
         raise UserError("User not found")
     if role is not None and role not in ROLES:
         raise UserError("Invalid role")
+    _guard_sysadmin(actor_role, target_role=user.role, requested_role=role)
 
     new_role = user.role if role is None else role
     new_active = user.is_active if is_active is None else is_active
-    loses_admin = user.role == "admin" and user.is_active and not (new_role == "admin" and new_active)
+    was_admin = user.role in ADMIN_ROLES and user.is_active
+    loses_admin = was_admin and not (new_role in ADMIN_ROLES and new_active)
     if loses_admin and _active_admin_count(db) <= 1:
         raise UserError("Cannot remove or disable the last active admin")
 
@@ -111,4 +130,12 @@ def seed_first_admin(db: Session, username: str, password: str) -> bool:
     if not password or db.scalar(select(func.count(User.id))):
         return False
     create_user(db, username, password, "admin")
+    return True
+
+
+def seed_sysadmin(db: Session, username: str, password: str) -> bool:
+    """Create the sysadmin account from configuration once; never overwrites an existing user."""
+    if not password or get_by_username(db, username):
+        return False
+    create_user(db, username, password, "sysadmin")
     return True

@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = ""
     SESSION_SECRET: str = ""
+    # Sysadmin account (can edit system settings); created once on startup when the password is set
+    SYSADMIN_USERNAME: str = "sysadmin"
+    SYSADMIN_PASSWORD: str = ""
     SESSION_HOURS: float = 8
     COOKIE_SECURE: bool = True
     

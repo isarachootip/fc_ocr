@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { UserPlus } from 'lucide-react';
 import { createUser, type ManagedUser } from '../../services/users';
 import type { Role } from '../../services/auth';
+import { isSysadmin } from '../../services/roles';
 
 interface Props {
+  currentUserRole: Role;
   onCreated: (user: ManagedUser) => void;
 }
 
 const INPUT = 'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
 
-export const UserCreateForm: React.FC<Props> = ({ onCreated }) => {
+export const UserCreateForm: React.FC<Props> = ({ currentUserRole, onCreated }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<Role>('user');
@@ -46,6 +48,7 @@ export const UserCreateForm: React.FC<Props> = ({ onCreated }) => {
         <select className={INPUT} aria-label="สิทธิ์" value={role} onChange={(e) => setRole(e.target.value as Role)}>
           <option value="user">ผู้ใช้งานทั่วไป</option>
           <option value="admin">ผู้ดูแลระบบ</option>
+          {isSysadmin(currentUserRole) && <option value="sysadmin">ผู้ดูแลระบบสูงสุด (Sysadmin)</option>}
         </select>
         <button type="submit" disabled={busy}
           className="py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-lg text-sm font-semibold">

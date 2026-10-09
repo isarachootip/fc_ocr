@@ -1,9 +1,12 @@
 import shutil
 import uuid
 from pathlib import Path
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from sqlalchemy.orm import Session
 from app.config import settings
+from app.database import get_db
 from app.schemas.ocr import IdCardOcrResult
+from app.services import settings_service
 from app.services.ocr_service import process_id_card
 
 router = APIRouter(prefix="/ocr", tags=["OCR"])
@@ -11,7 +14,7 @@ router = APIRouter(prefix="/ocr", tags=["OCR"])
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg"}
 
 @router.post("/scan-id-card", response_model=IdCardOcrResult)
-async def scan_id_card(file: UploadFile = File(...)):
+async def scan_id_card(file: UploadFile = File(...), db: Session = Depends(get_db)):
     ext = Path(file.filename or "").suffix.lower()
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -27,7 +30,7 @@ async def scan_id_card(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     try:
-        result = process_id_card(saved_path)
+        result = process_id_card(saved_path, settings_service.get_gemini_key(db))
         result.file_path = f"/uploads/{file_id}"
         return result
     except Exception as e:

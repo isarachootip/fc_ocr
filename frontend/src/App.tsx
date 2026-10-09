@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { Building2, ListFilter, PlusCircle, CheckCircle, LogOut, Users, KeyRound } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
+import { isAdmin, isSysadmin } from './services/roles';
+import { AppNav, type AppTab } from './components/layout/AppNav';
 import { UsersView } from './components/users/UsersView';
+import { SystemSettingsView } from './components/settings/SystemSettingsView';
 import { ChangePasswordModal } from './components/auth/ChangePasswordModal';
 import type { VendorFormData, VendorRecord } from './types/vendor';
 import type { IdCardOcrResult } from './types/ocr';
@@ -27,7 +30,7 @@ const INITIAL_FORM: VendorFormData = {
 
 export const App: React.FC = () => {
   const { user, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState<'form' | 'list' | 'users'>('form');
+  const [activeTab, setActiveTab] = useState<AppTab>('form');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<VendorFormData>({ ...INITIAL_FORM });
   const [ocrModalData, setOcrModalData] = useState<IdCardOcrResult | null>(null);
@@ -60,67 +63,14 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Top Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-100">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="font-bold text-slate-800 text-base">ระบบลงทะเบียนและจัดการ Vendor Master</h1>
-              <p className="text-xs text-slate-500">พร้อมระบบอ่านบัตรประชาชนอัตโนมัติ (AI & Local OCR)</p>
-            </div>
-          </div>
+      <AppNav
+        user={user}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        onOpenChangePassword={() => setShowPassword(true)}
+        onSignOut={signOut}
+      />
 
-          <div className="flex bg-slate-100 p-1 rounded-xl">
-            <button
-              onClick={() => setActiveTab('form')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                activeTab === 'form' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <PlusCircle className="w-4 h-4" /> แบบฟอร์มเปิด Vendor
-            </button>
-            <button
-              onClick={() => setActiveTab('list')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                activeTab === 'list' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <ListFilter className="w-4 h-4" /> ทะเบียนผู้ค้า & พิมพ์เอกสาร
-            </button>
-            {user.role === 'admin' && (
-              <button
-                onClick={() => setActiveTab('users')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  activeTab === 'users' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Users className="w-4 h-4" /> จัดการผู้ใช้
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-slate-500 hidden sm:inline mr-2">{user.username}</span>
-            <button
-              onClick={() => setShowPassword(true)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 flex items-center gap-1.5 transition-colors"
-            >
-              <KeyRound className="w-4 h-4" /> เปลี่ยนรหัสผ่าน
-            </button>
-            <button
-              onClick={signOut}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 flex items-center gap-1.5 transition-colors"
-            >
-              <LogOut className="w-4 h-4" /> ออกจากระบบ
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
       <main className="max-w-6xl w-full mx-auto px-4 py-6 flex-1">
         {successBanner && (
           <div className="mb-5 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-medium flex items-center justify-between">
@@ -142,14 +92,15 @@ export const App: React.FC = () => {
               onReset={() => setFormData({ ...INITIAL_FORM })}
             />
           </div>
-        ) : activeTab === 'users' && user.role === 'admin' ? (
+        ) : activeTab === 'users' && isAdmin(user.role) ? (
           <UsersView />
+        ) : activeTab === 'settings' && isSysadmin(user.role) ? (
+          <SystemSettingsView />
         ) : (
           <VendorListView onSelectPrint={(v) => setPrintVendor(v)} />
         )}
       </main>
 
-      {/* OCR Review & Confirm Modal */}
       {ocrModalData && (
         <OcrConfirmModal
           data={ocrModalData}
@@ -159,11 +110,7 @@ export const App: React.FC = () => {
       )}
 
       {showPassword && <ChangePasswordModal onClose={() => setShowPassword(false)} />}
-
-      {/* A4 Printable View Modal */}
-      {printVendor && (
-        <A4PrintableView vendor={printVendor} onClose={() => setPrintVendor(null)} />
-      )}
+      {printVendor && <A4PrintableView vendor={printVendor} onClose={() => setPrintVendor(null)} />}
     </div>
   );
 };

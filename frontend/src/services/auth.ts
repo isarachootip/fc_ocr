@@ -1,6 +1,6 @@
 import { apiFetch } from './http';
 
-export type Role = 'admin' | 'user';
+export type Role = 'admin' | 'user' | 'sysadmin';
 
 export interface AuthUser {
   username: string;

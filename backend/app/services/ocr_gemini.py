@@ -3,7 +3,6 @@ from pathlib import Path
 import fitz  # PyMuPDF
 from PIL import Image
 import google.generativeai as genai
-from app.config import settings
 from app.schemas.ocr import IdCardOcrResult
 
 OCR_PROMPT = """
@@ -46,12 +45,12 @@ def get_image_for_gemini(file_path: Path):
         return img
     return Image.open(str(file_path))
 
-def scan_id_card_gemini(file_path: Path) -> IdCardOcrResult:
+def scan_id_card_gemini(file_path: Path, api_key: str) -> IdCardOcrResult:
     """Scan ID card using Gemini Vision API."""
-    if not settings.GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY is not configured.")
+    if not api_key:
+        raise ValueError("Gemini API key is not configured.")
 
-    genai.configure(api_key=settings.GEMINI_API_KEY)
+    genai.configure(api_key=api_key)
     model = genai.GenerativeModel("gemini-2.5-flash")
 
     img = get_image_for_gemini(file_path)

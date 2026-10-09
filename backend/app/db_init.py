@@ -19,12 +19,15 @@ def ensure_schema(engine: Engine) -> None:
 
 
 def seed_admin() -> None:
-    """Create the first admin from ADMIN_USERNAME/ADMIN_PASSWORD when no users exist."""
+    """Create the first admin from ADMIN_USERNAME/ADMIN_PASSWORD when no users exist,
+    then the sysadmin from SYSADMIN_USERNAME/SYSADMIN_PASSWORD if that account is missing."""
     db = SessionLocal()
     try:
         if user_service.seed_first_admin(db, settings.ADMIN_USERNAME, settings.ADMIN_PASSWORD):
             logger.warning("Created initial admin user '%s'", settings.ADMIN_USERNAME)
         elif not user_service.list_users(db):
             logger.error("No users exist and ADMIN_PASSWORD is not set: nobody can log in")
+        if user_service.seed_sysadmin(db, settings.SYSADMIN_USERNAME, settings.SYSADMIN_PASSWORD):
+            logger.warning("Created sysadmin user '%s'", settings.SYSADMIN_USERNAME)
     finally:
         db.close()

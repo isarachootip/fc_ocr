@@ -5,6 +5,7 @@ from app.config import settings, BASE_DIR
 from app.database import engine, Base
 from app.models.vendor import Vendor  # ensure models are registered
 from app.models.user import User  # noqa: F401  (ensure model is registered)
+from app.models.app_setting import AppSetting  # noqa: F401  (ensure model is registered)
 from app.api import api_router
 from app.api.uploads import router as uploads_router
 from app.db_init import ensure_schema, seed_admin
