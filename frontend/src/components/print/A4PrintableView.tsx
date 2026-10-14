@@ -67,9 +67,10 @@ export const A4PrintableView: React.FC<Props> = ({ vendor, onClose }) => {
           <div className="mb-1"><b>ชื่อภาษาไทย:</b> {vendor.vendor_name_th}</div>
           <div className="mb-1"><b>ชื่อภาษาอังกฤษ:</b> {vendor.vendor_name_en || '-'}</div>
           <div>
-            <b>ที่อยู่:</b> เลขที่ {vendor.address_no || '-'} หมู่ {vendor.address_moo || '-'} 
-            ต.{vendor.address_subdistrict || '-'} อ.{vendor.address_district || '-'} 
-            จ.{vendor.address_province || '-'} {vendor.address_postcode || '-'} 
+            <b>ที่อยู่:</b> เลขที่ {vendor.address_no || '-'} หมู่ {vendor.address_moo || '-'}{' '}
+            ซอย {vendor.address_soi || '-'} ถนน {vendor.address_road || '-'}{' '}
+            ต.{vendor.address_subdistrict || '-'} อ.{vendor.address_district || '-'}{' '}
+            จ.{vendor.address_province || '-'} {vendor.address_postcode || '-'}{' '}
             | <b>โทร:</b> {vendor.vendor_phone || '-'} | <b>e-Tax:</b> {vendor.email_etax || '-'}
           </div>
         </div>

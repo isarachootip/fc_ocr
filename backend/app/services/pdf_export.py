@@ -94,7 +94,7 @@ def generate_vendor_pdf(vendor: Vendor) -> io.BytesIO:
         [Paragraph("<b>ข้อมูลผู้ประกอบการ / ร้านค้า</b>", bold_style), ""],
         [Paragraph(f"<b>ชื่อภาษาไทย:</b> {vendor.vendor_name_th}", normal_style), Paragraph(f"<b>ชื่อภาษาอังกฤษ:</b> {vendor.vendor_name_en or '-'}", normal_style)],
         [Paragraph(f"<b>เลขประจำตัวผู้เสียภาษี / บัตรประชาชน:</b> {tax_formatted}", bold_style), Paragraph(f"<b>สาขา:</b> {vendor.branch_no or 'สำนักงานใหญ่'}", normal_style)],
-        [Paragraph(f"<b>ที่อยู่:</b> เลขที่ {vendor.address_no or '-'} หมู่ {vendor.address_moo or '-'} ต.{vendor.address_subdistrict or '-'} อ.{vendor.address_district or '-'} จ.{vendor.address_province or '-'} {vendor.address_postcode or '-'}", normal_style), ""],
+        [Paragraph(f"<b>ที่อยู่:</b> เลขที่ {vendor.address_no or '-'} หมู่ {vendor.address_moo or '-'} ซอย {vendor.address_soi or '-'} ถนน {vendor.address_road or '-'} ต.{vendor.address_subdistrict or '-'} อ.{vendor.address_district or '-'} จ.{vendor.address_province or '-'} {vendor.address_postcode or '-'}", normal_style), ""],
         [Paragraph(f"<b>โทรศัพท์:</b> {vendor.vendor_phone or '-'}", normal_style), Paragraph(f"<b>Email e-Tax:</b> {vendor.email_etax or '-'}", normal_style)],
     ]
     info_table = Table(info_data, colWidths=[270, 265])

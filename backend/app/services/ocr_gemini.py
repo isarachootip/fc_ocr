@@ -4,6 +4,7 @@ import fitz  # PyMuPDF
 from PIL import Image
 import google.generativeai as genai
 from app.schemas.ocr import IdCardOcrResult
+from app.services.address_service import normalize_ocr_address
 
 OCR_PROMPT = """
 You are an expert OCR AI for Thai National ID Cards.
@@ -22,11 +23,13 @@ Analyze the provided Thai ID Card image. Extract the following fields accurately
   "date_of_birth_en": "Date of Birth English เช่น 21 Jul. 1964",
   "address_raw": "ที่อยู่เต็มตามบัตร",
   "address_no": "บ้านเลขที่",
-  "address_moo": "หมู่ที่ (เฉพาะตัวเลข)",
-  "address_subdistrict": "ตำบลหรือแขวง (ตัดคำว่า ต. หรือ ตำบล ออก)",
-  "address_district": "อำเภอหรือเขต (ตัดคำว่า อ. หรือ อำเภอ ออก)",
-  "address_province": "จังหวัด (ตัดคำว่า จ. หรือ จังหวัด ออก)",
-  "address_postcode": "รหัสไปรษณีย์ 5 หลัก",
+  "address_moo": "หมู่ที่ (เฉพาะตัวเลข ถ้าไม่มีให้ใส่ null)",
+  "address_soi": "ตรอกหรือซอย (ตัดคำว่า ตรอก, ซ., ซอย ออก ถ้าไม่มีให้ใส่ null)",
+  "address_road": "ถนน (ตัดคำว่า ถ., ถนน ออก ถ้าไม่มีให้ใส่ null)",
+  "address_subdistrict": "ตำบลหรือแขวง (ตัดคำว่า ต., ตำบล, แขวง ออก)",
+  "address_district": "อำเภอหรือเขต (ตัดคำว่า อ., อำเภอ, เขต ออก)",
+  "address_province": "จังหวัด (ตัดคำว่า จ., จังหวัด ออก)",
+  "address_postcode": "รหัสไปรษณีย์ 5 หลักของตำบล/อำเภอ/จังหวัดนั้น",
   "issue_date": "วันออกบัตร",
   "expiry_date": "วันหมดอายุ"
 }
@@ -67,4 +70,4 @@ def scan_id_card_gemini(file_path: Path, api_key: str) -> IdCardOcrResult:
     data = json.loads(clean_text.strip())
     data["engine_used"] = "AI_GEMINI"
     data["file_path"] = str(file_path)
-    return IdCardOcrResult(**data)
+    return normalize_ocr_address(IdCardOcrResult(**data))

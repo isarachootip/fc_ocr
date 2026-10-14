@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Check, X, Sparkles } from 'lucide-react';
 import type { IdCardOcrResult } from '../../types/ocr';
+import { lookupPostcode } from '../../services/api';
 
 interface Props {
   data: IdCardOcrResult;
@@ -8,11 +9,30 @@ interface Props {
   onClose: () => void;
 }
 
+const ADDRESS_FIELDS: Array<{ key: keyof IdCardOcrResult; label: string; triggersPostcode?: boolean }> = [
+  { key: 'address_no', label: 'เลขที่' },
+  { key: 'address_moo', label: 'หมู่ที่' },
+  { key: 'address_soi', label: 'ตรอก / ซอย' },
+  { key: 'address_road', label: 'ถนน' },
+  { key: 'address_subdistrict', label: 'ตำบล / แขวง', triggersPostcode: true },
+  { key: 'address_district', label: 'อำเภอ / เขต', triggersPostcode: true },
+  { key: 'address_province', label: 'จังหวัด', triggersPostcode: true },
+  { key: 'address_postcode', label: 'รหัสไปรษณีย์' },
+];
+
 export const OcrConfirmModal: React.FC<Props> = ({ data, onConfirm, onClose }) => {
   const [formData, setFormData] = useState<IdCardOcrResult>({ ...data });
 
-  const updateField = (field: keyof IdCardOcrResult, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const updateField = async (field: keyof IdCardOcrResult, value: string, triggersPostcode?: boolean) => {
+    const next = { ...formData, [field]: value };
+    setFormData(next);
+
+    if (triggersPostcode) {
+      const code = await lookupPostcode(next.address_subdistrict, next.address_district, next.address_province);
+      if (code) {
+        setFormData((prev) => ({ ...prev, address_postcode: code }));
+      }
+    }
   };
 
   return (
@@ -71,61 +91,18 @@ export const OcrConfirmModal: React.FC<Props> = ({ data, onConfirm, onClose }) =
 
           <div className="border-t border-slate-100 pt-4">
             <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">ที่อยู่ตามบัตรประชาชน</h4>
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">เลขที่</label>
-                <input
-                  type="text"
-                  value={formData.address_no || ''}
-                  onChange={(e) => updateField('address_no', e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">หมู่ที่</label>
-                <input
-                  type="text"
-                  value={formData.address_moo || ''}
-                  onChange={(e) => updateField('address_moo', e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">ตำบล / แขวง</label>
-                <input
-                  type="text"
-                  value={formData.address_subdistrict || ''}
-                  onChange={(e) => updateField('address_subdistrict', e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">อำเภอ / เขต</label>
-                <input
-                  type="text"
-                  value={formData.address_district || ''}
-                  onChange={(e) => updateField('address_district', e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">จังหวัด</label>
-                <input
-                  type="text"
-                  value={formData.address_province || ''}
-                  onChange={(e) => updateField('address_province', e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">รหัสไปรษณีย์</label>
-                <input
-                  type="text"
-                  value={formData.address_postcode || ''}
-                  onChange={(e) => updateField('address_postcode', e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm"
-                />
-              </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {ADDRESS_FIELDS.map(({ key, label, triggersPostcode }) => (
+                <div key={key}>
+                  <label className="block text-xs text-slate-500 mb-1">{label}</label>
+                  <input
+                    type="text"
+                    value={(formData[key] as string) || ''}
+                    onChange={(e) => updateField(key, e.target.value, triggersPostcode)}
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>

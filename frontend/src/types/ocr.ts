@@ -16,6 +16,8 @@ export interface IdCardOcrResult {
   address_raw?: string | null;
   address_no?: string | null;
   address_moo?: string | null;
+  address_soi?: string | null;
+  address_road?: string | null;
   address_subdistrict?: string | null;
   address_district?: string | null;
   address_province?: string | null;

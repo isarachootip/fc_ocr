@@ -1,4 +1,4 @@
-﻿import { apiFetch } from './http';
+import { apiFetch } from './http';
 import type { IdCardOcrResult } from '../types/ocr';
 import type {
   VendorFormData,
@@ -23,6 +23,22 @@ export async function scanIdCard(file: File): Promise<IdCardOcrResult> {
   }
 
   return res.json();
+}
+
+export async function lookupPostcode(
+  subdistrict?: string | null,
+  district?: string | null,
+  province?: string | null
+): Promise<string> {
+  const params = new URLSearchParams();
+  if (subdistrict?.trim()) params.set('subdistrict', subdistrict.trim());
+  if (district?.trim()) params.set('district', district.trim());
+  if (province?.trim()) params.set('province', province.trim());
+
+  const res = await apiFetch(`${BASE_URL}/ocr/postcode?${params.toString()}`);
+  if (!res.ok) return '';
+  const data: { postcode?: string } = await res.json();
+  return data.postcode || '';
 }
 
 export async function createVendor(data: VendorFormData): Promise<VendorRecord> {

@@ -41,14 +41,16 @@ export const App: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       vendor_name_th: confirmed.full_name_th || prev.vendor_name_th,
-      vendor_name_en: confirmed.full_name_en || prev.vendor_name_en,
+      vendor_name_en: confirmed.full_name_en || '',
       tax_id: confirmed.tax_id || prev.tax_id,
-      address_no: confirmed.address_no || prev.address_no,
-      address_moo: confirmed.address_moo || prev.address_moo,
-      address_subdistrict: confirmed.address_subdistrict || prev.address_subdistrict,
-      address_district: confirmed.address_district || prev.address_district,
-      address_province: confirmed.address_province || prev.address_province,
-      address_postcode: confirmed.address_postcode || prev.address_postcode,
+      address_no: confirmed.address_no || '',
+      address_moo: confirmed.address_moo || '',
+      address_soi: confirmed.address_soi || '',
+      address_road: confirmed.address_road || '',
+      address_subdistrict: confirmed.address_subdistrict || '',
+      address_district: confirmed.address_district || '',
+      address_province: confirmed.address_province || '',
+      address_postcode: confirmed.address_postcode || '',
       id_card_file_path: confirmed.file_path || prev.id_card_file_path,
     }));
     setOcrModalData(null);

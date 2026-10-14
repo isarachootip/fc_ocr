@@ -20,6 +20,8 @@ class IdCardOcrResult(BaseModel):
     address_raw: Optional[str] = Field(None, description="ที่อยู่เต็ม")
     address_no: Optional[str] = Field(None, description="บ้านเลขที่")
     address_moo: Optional[str] = Field(None, description="หมู่ที่")
+    address_soi: Optional[str] = Field(None, description="ตรอก / ซอย")
+    address_road: Optional[str] = Field(None, description="ถนน")
     address_subdistrict: Optional[str] = Field(None, description="ตำบล / แขวง")
     address_district: Optional[str] = Field(None, description="อำเภอ / เขต")
     address_province: Optional[str] = Field(None, description="จังหวัด")

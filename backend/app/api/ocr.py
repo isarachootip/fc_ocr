@@ -1,17 +1,30 @@
 import shutil
 import uuid
 from pathlib import Path
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from typing import Optional
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.schemas.ocr import IdCardOcrResult
 from app.services import settings_service
 from app.services.ocr_service import process_id_card
+from app.services.address_service import resolve_postcode
 
 router = APIRouter(prefix="/ocr", tags=["OCR"])
 
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg"}
+
+
+@router.get("/postcode")
+def lookup_postcode(
+    subdistrict: Optional[str] = Query(None),
+    district: Optional[str] = Query(None),
+    province: Optional[str] = Query(None),
+):
+    postcode = resolve_postcode(subdistrict=subdistrict, district=district, province=province)
+    return {"postcode": postcode}
+
 
 @router.post("/scan-id-card", response_model=IdCardOcrResult)
 async def scan_id_card(file: UploadFile = File(...), db: Session = Depends(get_db)):
